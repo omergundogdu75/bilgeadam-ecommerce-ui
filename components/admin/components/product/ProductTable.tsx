@@ -23,6 +23,12 @@ import axiosClient from "@/lib/axiosClient";
 interface Category {
   id: number;
   name: string;
+  parent?: Category | null;
+}
+
+interface Brand {
+  id: number;
+  name: string;
 }
 
 interface Product {
@@ -33,11 +39,13 @@ interface Product {
   stock: number;
   imageUrl: string;
   category: Category;
+  brand: Brand;
 }
 
 export default function ProductTable() {
   const [rows, setRows] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -50,6 +58,7 @@ export default function ProductTable() {
   const [stock, setStock] = useState(0);
   const [imageUrl, setImageUrl] = useState("");
   const [categoryId, setCategoryId] = useState<number | "">("");
+  const [brandId, setBrandId] = useState<number | "">("");
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -72,9 +81,19 @@ export default function ProductTable() {
     }
   };
 
+  const fetchBrands = async () => {
+    try {
+      const res = await axiosClient.get<Brand[]>("/brands");
+      setBrands(res.data);
+    } catch (err) {
+      console.error("Markalar alınamadı", err);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
     fetchCategories();
+    fetchBrands();
   }, []);
 
   const handleOpenAdd = () => {
@@ -85,6 +104,7 @@ export default function ProductTable() {
     setStock(0);
     setImageUrl("");
     setCategoryId("");
+    setBrandId("");
     setModalOpen(true);
   };
 
@@ -97,6 +117,7 @@ export default function ProductTable() {
     setStock(row.stock);
     setImageUrl(row.imageUrl);
     setCategoryId(row.category.id);
+    setBrandId(row.brand.id);
     setModalOpen(true);
   };
 
@@ -122,6 +143,7 @@ export default function ProductTable() {
       stock,
       imageUrl,
       categoryId,
+      brandId,
     };
     try {
       if (isEditing && selectedRow) {
@@ -147,17 +169,16 @@ export default function ProductTable() {
       headerName: "Kategori",
       width: 150,
       valueGetter: (category) => {
-
+   
         if (!category) return "-";
-      
-        const parentName = category.parent?.name ?? "";
-        const name = category.name ?? "";
-      
-        if (parentName) {
-          return `${parentName} -> ${name}`;
-        }
-        return name || "-";
-      }
+        return category.parent?.name ? `${category.parent.name} -> ${category.name}` : category.name;
+      },
+    },
+    {
+      field: "brand",
+      headerName: "Marka",
+      width: 150,
+      valueGetter: (brand) => brand?.name || "-",
     },
     {
       field: "actions",
@@ -215,6 +236,19 @@ export default function ProductTable() {
               >
                 {categories.map((cat) => (
                   <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth>
+              <InputLabel>Marka</InputLabel>
+              <Select
+                value={brandId}
+                label="Marka"
+                onChange={(e) => setBrandId(Number(e.target.value))}
+              >
+                {brands.map((brand) => (
+                  <MenuItem key={brand.id} value={brand.id}>{brand.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>
