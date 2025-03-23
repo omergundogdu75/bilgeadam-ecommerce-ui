@@ -4,9 +4,5 @@
 import SignInSide from "@/components/sign-in-side/SignInSide";
 
 export default function AdminLoginPage() {
-
-
-  return (
-    <SignInSide/>
-  );
+  return <SignInSide />;
 }

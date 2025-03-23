@@ -5,10 +5,18 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import { LinkedIn } from "@mui/icons-material";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+    // /admin ile başlayan sayfalarda Navbar gösterme
+    if (pathname.startsWith("/admin")) {
+      return null;
+    }
+
   return (
-    <Box component="footer" sx={{ bgcolor: "primary.main", color: "white"}}>
+    <Box component="footer" sx={{ bgcolor: "primary.main", color: "white",padding:5}}>
       <Container maxWidth="lg">
         <Grid container spacing={4}>
           {/* Kategoriler */}

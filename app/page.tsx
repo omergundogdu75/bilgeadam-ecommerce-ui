@@ -1,29 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { Box, Container, Typography, Grid, Button, Card, CardContent, CardMedia } from "@mui/material";
 import Link from "next/link";
-import Navbar from "@/components/navbar/Navbar";
-import LoginModal from "@/components/login/LoginModal";
+
 
 export default function HomePage() {
-  const [auth, setAuth] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-
   return (
-    <Box >
-      <Navbar
-        auth={auth}
-        onLogout={() => setAuth(false)}
-        onLoginClick={() => setLoginOpen(true)}
-      />
-
-      <LoginModal
-        open={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onLogin={() => setAuth(true)}
-      />
-
+    <Box>
       {/* Hero */}
       <Box
         sx={{
@@ -33,6 +16,7 @@ export default function HomePage() {
           color: "black",
           textAlign: "center",
           py: 10,
+          height:"100vh"
         }}
       >
         <Container>
@@ -52,3 +36,4 @@ export default function HomePage() {
     </Box>
   );
 }
+

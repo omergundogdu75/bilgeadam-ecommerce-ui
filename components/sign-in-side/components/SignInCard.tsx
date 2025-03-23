@@ -134,7 +134,7 @@ export default function SignInCard() {
             id="email"
             type="email"
             name="email"
-            placeholder="your@email.com"
+            placeholder="admin@gnd.com"
             autoComplete="email"
             autoFocus
             required
@@ -160,7 +160,7 @@ export default function SignInCard() {
             error={passwordError}
             helperText={passwordErrorMessage}
             name="password"
-            placeholder="••••••"
+            placeholder="123456"
             type="password"
             id="password"
             autoComplete="current-password"

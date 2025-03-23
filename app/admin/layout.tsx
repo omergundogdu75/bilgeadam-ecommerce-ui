@@ -1,6 +1,7 @@
 // app/admin/layout.tsx
 "use client";
 
+import { Box } from "@mui/material";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -24,6 +25,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (auth === null) return null; // loading...
 
-  return <>{children}</>;
+  return <Box sx={{height:"100vh"}}>{children}</Box>;
 }
-457850

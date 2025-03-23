@@ -1,10 +1,11 @@
-// src/app/layout.tsx
-
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
+import { Box } from "@mui/material";
+import ThemeRegistry from "./ThemeRegistry";
+import NavbarWrapper from "@/components/navbar/NavbarWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,11 +21,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr" suppressHydrationWarning>
-      <body className={`${inter.className} bg-gray-50 text-gray-900`}>
-        
-        <main className="min-h-[calc(100vh-160px)] px-4 py-6 md:px-8 container mx-auto">
-          {children}
-        </main>
+      <body>
+        <NavbarWrapper />
+        <Box>
+          <ThemeRegistry>{children}</ThemeRegistry>
+        </Box>
         <Footer />
       </body>
     </html>
