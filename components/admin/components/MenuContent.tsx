@@ -14,6 +14,8 @@ const mainListItems = [
   { text: 'Category', icon: <Category />, href: '/admin/dashboard/category' },
   { text: 'Orders', icon: <ProductionQuantityLimits />, href: '/admin/dashboard/orders' },
   { text: 'Products', icon: <Info />, href: '/admin/dashboard/products' },
+  { text: 'Brands', icon: <Info />, href: '/admin/dashboard/brands' },
+
 ];
 
 export default function MenuContent() {
