@@ -16,6 +16,7 @@ import {
   InputLabel,
   FormControl,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 import { Add, Delete, Edit } from "@mui/icons-material";
 import axiosClient from "@/lib/axiosClient";
@@ -23,23 +24,52 @@ import axiosClient from "@/lib/axiosClient";
 interface Category {
   id: number;
   name: string;
+  slug: string;
   parent: Category | null;
+  imageUrl?: string;
+  children?: Category[];
 }
 
 export default function CategoryTable() {
   const [rows, setRows] = React.useState<Category[]>([]);
+  const [flatRows, setFlatRows] = React.useState<Category[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [selectedRow, setSelectedRow] = React.useState<Category | null>(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
   const [categoryName, setCategoryName] = React.useState("");
   const [parentId, setParentId] = React.useState<number | null>(null);
+  const [imageUrl, setImageUrl] = React.useState("");
+
+  const flattenCategories = (
+    categories: Category[],
+    parent: Category | null = null,
+    seen = new Set<number>()
+  ): Category[] => {
+    let result: Category[] = [];
+    for (const cat of categories) {
+      if (seen.has(cat.id)) continue;
+      seen.add(cat.id);
+
+      const withParent = { ...cat, parent };
+      result.push(withParent);
+
+      if (cat.children?.length) {
+        result = result.concat(
+          flattenCategories(cat.children, withParent, seen)
+        );
+      }
+    }
+    return result;
+  };
 
   const fetchCategories = async () => {
     setLoading(true);
     try {
       const response = await axiosClient.get<Category[]>("/categories");
       setRows(response.data);
+      const flat = flattenCategories(response.data);
+      setFlatRows(flat);
     } catch (error) {
       console.error("Kategoriler alınamadı", error);
     } finally {
@@ -86,6 +116,7 @@ export default function CategoryTable() {
     const payload = {
       name: categoryName,
       parentId,
+      imageUrl
     };
 
     try {
@@ -105,14 +136,45 @@ export default function CategoryTable() {
     { field: "id", headerName: "ID", width: 90 },
     { field: "name", headerName: "Kategori Adı", flex: 1 },
     {
-      field: "parent",
-      headerName: "Üst Kategori",
+      field: "imageUrl",
+      headerName: "Resim",
+      flex: 1 ,
+      renderCell: (params) => (
+        params.row.imageUrl ? (
+          <img
+            src={params.row.imageUrl}
+            alt={params.row.name}
+            style={{ width: 60, height: 40, objectFit: "cover", borderRadius: 4 }}
+          />
+        ) : (
+          <Box display="flex"
+          alignItems="center"
+          justifyContent="left"
+          width="100%"
+          height="100%">Yok</Box>
+        )
+      ),
+    },    
+    {
+      field: "slug",
+      headerName: "Slug",
       width: 150,
-      valueGetter: (row) => {
-        console.log(row)
-        if (!row || typeof row !== "object") return "Yok";
-        return row.name ?? "Yok";
-      },
+    },
+    {
+      field: "parentName",
+      headerName: "Üst Kategori",
+      width: 200,
+      renderCell: (params) => (
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          width="100%"
+          height="100%"
+        >
+          <Typography>{params.row.parent?.name || "Yok"}</Typography>
+        </Box>
+      ),
     },
     {
       field: "actions",
@@ -137,7 +199,13 @@ export default function CategoryTable() {
 
   return (
     <Box sx={{ height: "90vh", width: "100%", p: 4 }}>
-      <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 2 }}
+      >
+        <Typography variant="h6">Kategori Yönetimi</Typography>
         <Button variant="contained" startIcon={<Add />} onClick={handleOpenAdd}>
           Kategori Ekle
         </Button>
@@ -154,14 +222,15 @@ export default function CategoryTable() {
         </Box>
       ) : (
         <DataGrid
-          rows={rows}
+          rows={flatRows}
           columns={columns}
+          getRowId={(row) => row.id}
           disableRowSelectionOnClick
           sx={{ height: "80vh" }}
         />
       )}
 
-      <Dialog open={modalOpen} onClose={handleModalClose}>
+      <Dialog open={modalOpen} onClose={handleModalClose} fullWidth>
         <DialogTitle>
           {isEditing ? "Kategori Güncelle" : "Yeni Kategori Ekle"}
         </DialogTitle>
@@ -174,6 +243,13 @@ export default function CategoryTable() {
             value={categoryName}
             onChange={(e) => setCategoryName(e.target.value)}
           />
+          <TextField
+            label="Resim URL"
+            fullWidth
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+          />
+
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>Üst Kategori</InputLabel>
             <Select
@@ -186,12 +262,8 @@ export default function CategoryTable() {
               }
             >
               <MenuItem value="">(Ana Kategori)</MenuItem>
-              {rows
-                .filter(
-                  (cat) =>
-                    cat.parent == null &&
-                    (!isEditing || cat.id !== selectedRow?.id)
-                )
+              {flatRows
+                .filter((cat) => !cat.parent)
                 .map((cat) => (
                   <MenuItem key={cat.id} value={cat.id}>
                     {cat.name}
@@ -202,7 +274,7 @@ export default function CategoryTable() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleModalClose}>İptal</Button>
-          <Button onClick={handleSave} variant="contained">
+          <Button variant="contained" onClick={handleSave}>
             Kaydet
           </Button>
         </DialogActions>

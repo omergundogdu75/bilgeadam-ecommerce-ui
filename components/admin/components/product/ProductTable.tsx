@@ -59,6 +59,7 @@ export default function ProductTable() {
   const [imageUrl, setImageUrl] = useState("");
   const [categoryId, setCategoryId] = useState<number | "">("");
   const [brandId, setBrandId] = useState<number | "">("");
+  const [flatCategories, setFlatCategories] = useState<Category[]>([]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -72,10 +73,35 @@ export default function ProductTable() {
     }
   };
 
+  const flattenCategories = (
+    categories: Category[],
+    parent: Category | null = null
+  ): Category[] => {
+    let result: Category[] = [];
+
+    for (const category of categories) {
+      const flatCategory = {
+        ...category,
+        parent,
+      };
+      result.push(flatCategory);
+
+      if (category.children && category.children.length > 0) {
+        result = result.concat(
+          flattenCategories(category.children, flatCategory)
+        );
+      }
+    }
+
+    return result;
+  };
+
   const fetchCategories = async () => {
     try {
       const res = await axiosClient.get<Category[]>("/categories");
       setCategories(res.data);
+      const flattened = flattenCategories(res.data);
+      setFlatCategories(flattened);
     } catch (err) {
       console.error("Kategoriler alınamadı", err);
     }
@@ -161,7 +187,35 @@ export default function ProductTable() {
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 90 },
     { field: "name", headerName: "Ürün Adı", flex: 1 },
-    { field: "imageUrl", headerName: "Url", flex: 1 },
+    {
+      field: "imageUrl",
+      headerName: "Url",
+      flex: 1,
+      renderCell: (params) =>
+        params.row.imageUrl ? (
+          <img
+            src={params.row.imageUrl}
+            alt={params.row.name}
+            style={{
+              width: 60,
+              height: 40,
+              objectFit: "fit",
+              borderRadius: 4,
+            }}
+          />
+        ) : (
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="left"
+            width="100%"
+            height="100%"
+          >
+            Yok
+          </Box>
+        ),
+    },
+
     { field: "price", headerName: "Fiyat", width: 100 },
     { field: "stock", headerName: "Stok", width: 100 },
     {
@@ -169,9 +223,11 @@ export default function ProductTable() {
       headerName: "Kategori",
       width: 150,
       valueGetter: (category) => {
-   
+        console.log(category);
         if (!category) return "-";
-        return category.parent?.name ? `${category.parent.name} -> ${category.name}` : category.name;
+        return category.parent?.name
+          ? `${category.parent.name} -> ${category.name}`
+          : category.name;
       },
     },
     {
@@ -210,22 +266,66 @@ export default function ProductTable() {
       </Stack>
 
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="70vh">
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="70vh"
+        >
           <CircularProgress />
         </Box>
       ) : (
-        <DataGrid rows={rows} columns={columns} disableRowSelectionOnClick sx={{ height: "80vh" }} />
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          disableRowSelectionOnClick
+          sx={{ height: "80vh" }}
+        />
       )}
 
-      <Dialog open={modalOpen} onClose={handleModalClose} fullWidth maxWidth="sm">
-        <DialogTitle>{isEditing ? "Ürünü Güncelle" : "Yeni Ürün Ekle"}</DialogTitle>
+      <Dialog
+        open={modalOpen}
+        onClose={handleModalClose}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          {isEditing ? "Ürünü Güncelle" : "Yeni Ürün Ekle"}
+        </DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
-            <TextField label="Ürün Adı" fullWidth value={name} onChange={(e) => setName(e.target.value)} />
-            <TextField label="Açıklama" fullWidth value={description} onChange={(e) => setDescription(e.target.value)} />
-            <TextField label="Fiyat" type="number" fullWidth value={price} onChange={(e) => setPrice(Number(e.target.value))} />
-            <TextField label="Stok" type="number" fullWidth value={stock} onChange={(e) => setStock(Number(e.target.value))} />
-            <TextField label="Görsel URL" fullWidth value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+            <TextField
+              label="Ürün Adı"
+              fullWidth
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <TextField
+              label="Açıklama"
+              fullWidth
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <TextField
+              label="Fiyat"
+              type="number"
+              fullWidth
+              value={price}
+              onChange={(e) => setPrice(Number(e.target.value))}
+            />
+            <TextField
+              label="Stok"
+              type="number"
+              fullWidth
+              value={stock}
+              onChange={(e) => setStock(Number(e.target.value))}
+            />
+            <TextField
+              label="Görsel URL"
+              fullWidth
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+            />
 
             <FormControl fullWidth>
               <InputLabel>Kategori</InputLabel>
@@ -234,8 +334,12 @@ export default function ProductTable() {
                 label="Kategori"
                 onChange={(e) => setCategoryId(Number(e.target.value))}
               >
-                {categories.map((cat) => (
-                  <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
+                {flatCategories.map((cat) => (
+                  <MenuItem key={cat.id} value={cat.id}>
+                    {cat.parent
+                      ? `${cat.parent.name} -> ${cat.name}`
+                      : cat.name}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -248,7 +352,9 @@ export default function ProductTable() {
                 onChange={(e) => setBrandId(Number(e.target.value))}
               >
                 {brands.map((brand) => (
-                  <MenuItem key={brand.id} value={brand.id}>{brand.name}</MenuItem>
+                  <MenuItem key={brand.id} value={brand.id}>
+                    {brand.name}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -256,7 +362,9 @@ export default function ProductTable() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleModalClose}>İptal</Button>
-          <Button variant="contained" onClick={handleSave}>Kaydet</Button>
+          <Button variant="contained" onClick={handleSave}>
+            Kaydet
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
