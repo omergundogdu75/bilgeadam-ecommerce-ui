@@ -14,6 +14,8 @@ import { styled } from "@mui/material/styles";
 import ForgotPassword from "./ForgotPassword";
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from "./CustomIcons";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import axiosClient from "@/lib/axiosClient";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -61,7 +63,9 @@ export default function SignInCard() {
     });
   };
 
-  const validateInputs = () => {
+  const validateInputs = async () => {
+    event.preventDefault();
+
     const email = document.getElementById("email") as HTMLInputElement;
     const password = document.getElementById("password") as HTMLInputElement;
   
@@ -87,17 +91,24 @@ export default function SignInCard() {
       setPasswordErrorMessage("");
     }
   
-    // Eğer inputlar geçerliyse giriş kontrolü yapılır
-    if (isValid) {
-      if (email.value === "admin@gnd.com" && password.value === "123456") {
-        localStorage.setItem("admin-auth", "true");
-        router.push("/admin/dashboard");
-      } else {
-        alert("Hatalı e-posta veya şifre!");
-      }
-    }
+    if (!isValid) return;
   
-    return isValid;
+    try {
+      const res = await axiosClient.post("/auth/admin-login", {
+        email: email.value,
+        password: password.value,
+      });
+  
+      const token = res.data.token || res.data.accessToken;
+      localStorage.setItem("accessToken", token);
+      localStorage.setItem("admin-auth", "true");
+  
+      toast.success("Giriş başarılı ✅");
+      router.push("/admin/dashboard");
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Bilinmeyen bir hata oluştu";
+      toast.error(`❌ ${msg}`);
+    }
   };
   
 
@@ -134,7 +145,8 @@ export default function SignInCard() {
             id="email"
             type="email"
             name="email"
-            placeholder="admin@gnd.com"
+            placeholder="omergundogdu75@gmail.com"
+            value={"omergundogdu75@gmail.com"}
             autoComplete="email"
             autoFocus
             required
@@ -182,14 +194,13 @@ export default function SignInCard() {
           Giriş
         </Button>
         <Typography sx={{ textAlign: "center" }}>
-          Don&apos;t have an account?{" "}
           <span>
             <Link
-              href="/material-ui/getting-started/templates/sign-in/"
+              href="/"
               variant="body2"
               sx={{ alignSelf: "center" }}
             >
-              Sign up
+               Ana sayfa
             </Link>
           </span>
         </Typography>

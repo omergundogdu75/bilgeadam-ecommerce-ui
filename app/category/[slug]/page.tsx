@@ -1,22 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 import {
   Box,
+  Container,
   Typography,
   Grid,
+  Button,
   Card,
   CardContent,
   CardMedia,
-  CircularProgress,
-  Button,
+  CircularProgress
 } from "@mui/material";
-import axiosClient from "@/lib/axiosClient";
-import Link from "next/link";
-import { useCart } from "@/context/CartContext";
-import { toast } from "react-toastify";
+import Link from "next/link"; 
+import { useEffect, useState } from "react";
+import axiosClient from "@/lib/axiosClient"; 
+import { useCart } from "@/context/CartContext"; 
+import { toast } from "react-toastify"; 
+import { useParams } from "next/navigation"; 
 
+// Kategori ve ürün tip tanımları
 interface Category {
   id: number;
   name: string;
@@ -35,18 +37,20 @@ interface Product {
 }
 
 export default function CategoryPage() {
-  const { slug } = useParams();
+  const { slug } = useParams(); // URL'den kategori slug'ını al
   const [category, setCategory] = useState<Category | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { state, dispatch } = useCart(); // state eklendi (stok kontrolü için)
+  const { state, dispatch } = useCart(); // Sepet context'inden ürün ekleme/çıkarma işlemleri
 
+  // Kategori ve ürünleri çek
   const fetchCategoryAndProducts = async () => {
     setLoading(true);
     try {
       const res = await axiosClient.get<Category[]>("/categories");
       const allCategories: Category[] = [];
 
+      // Alt kategorileri düz liste haline getir
       res.data.forEach((cat) => {
         allCategories.push(cat);
         if (cat.children) {
@@ -59,13 +63,15 @@ export default function CategoryPage() {
         }
       });
 
+      // Slug'a göre kategori bul
       const found = allCategories.find((cat) => cat.slug === slug);
 
       if (found) {
         setCategory(found);
 
+        // Ürünleri kategori ID'ye göre çek
         const prodRes = await axiosClient.get<Product[]>(
-          `/products?categorySlug=${slug}`
+          `/products/category/${found.id}`
         );
         setProducts(prodRes.data);
       } else {
@@ -80,9 +86,10 @@ export default function CategoryPage() {
   };
 
   useEffect(() => {
-    if (slug) fetchCategoryAndProducts();
+    if (slug) fetchCategoryAndProducts(); // Sayfa yüklendiğinde veya slug değiştiğinde verileri çek
   }, [slug]);
 
+  // Ürünü sepete ekle
   const handleAddToCart = (prod: Product) => {
     const existingItem = state.items.find((item) => item.id === prod.id);
     const currentQuantity = existingItem?.quantity ?? 0;
@@ -108,6 +115,7 @@ export default function CategoryPage() {
     toast.success("Ürün sepete eklendi ✅");
   };
 
+  // Yüklenme animasyonu göster
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
@@ -122,27 +130,18 @@ export default function CategoryPage() {
         {category?.name} Kategorisi
       </Typography>
 
+      {/* Alt Kategoriler */}
       {category?.children?.length ? (
         <Grid container spacing={3} mb={4}>
           {category.children.map((sub) => (
             <Grid item key={sub.id}>
-              <Link
-                href={`/category/${sub.slug}`}
-                passHref
-                style={{ textDecoration: "none" }}
-              >
+              <Link href={`/category/${sub.slug}`} passHref style={{ textDecoration: "none" }}>
                 <CardContent sx={{ textAlign: "center" }}>
                   <Box
                     component="img"
                     src={sub.imageUrl || "/placeholder.png"}
                     alt={sub.name}
-                    sx={{
-                      width: 100,
-                      height: 100,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      mb: 1,
-                    }}
+                    sx={{ width: 100, height: 100, borderRadius: "50%", objectFit: "cover", mb: 1 }}
                   />
                   <Typography variant="h6">{sub.name}</Typography>
                 </CardContent>
@@ -152,9 +151,11 @@ export default function CategoryPage() {
         </Grid>
       ) : null}
 
+      {/* Ürünler */}
       <Typography variant="h6" gutterBottom>
         Ürünler
       </Typography>
+
       {products.length === 0 ? (
         <Typography>Bu kategoride ürün bulunamadı.</Typography>
       ) : (
@@ -182,10 +183,7 @@ export default function CategoryPage() {
                     component="img"
                     image={prod.imageUrl}
                     alt={prod.name}
-                    sx={{
-                      height: 350,
-                      objectFit: "contain",
-                    }}
+                    sx={{ height: 350, objectFit: "contain" }}
                   />
                 )}
                 <CardContent sx={{ p: 2, textAlign: "center" }}>

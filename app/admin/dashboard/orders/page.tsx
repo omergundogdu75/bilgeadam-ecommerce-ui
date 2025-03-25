@@ -1,9 +1,10 @@
+import AdminOrdersPage from '@/components/admin/components/order/AdminOrderPage'
 import React from 'react'
 
-const Ordes = () => {
+const Orders = () => {
   return (
-    <div>Ordes</div>
+    <AdminOrdersPage/>
   )
 }
 
-export default Ordes
+export default Orders

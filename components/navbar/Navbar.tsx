@@ -14,7 +14,8 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useEffect, useState } from "react";
 import axiosClient from "@/lib/axiosClient";
 import { useCart } from "@/context/CartContext";
-import { useAuth } from "@/context/AuthContext"; // ✅ AuthContext
+import { useAuth } from "@/context/AuthContext";
+import { Person } from "@mui/icons-material";
 
 interface Category {
   id: number;
@@ -27,8 +28,11 @@ interface Category {
 export default function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const { state } = useCart();
-  const { isAuthenticated, logout } = useAuth(); // ✅ context'ten alındı
-  const totalQuantity = state.items.reduce((sum, item) => sum + item.quantity, 0);
+  const { isAuthenticated, logout } = useAuth();
+  const totalQuantity = state.items.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
 
   const fetchCategories = async () => {
     try {
@@ -64,9 +68,17 @@ export default function Navbar({ onLoginClick }: { onLoginClick: () => void }) {
 
         {/* Giriş / Çıkış */}
         {isAuthenticated ? (
-          <Button color="inherit" onClick={logout}>
-            Çıkış Yap
-          </Button>
+          <>
+            <Button color="inherit" onClick={logout}>
+              Çıkış Yap
+            </Button>
+            {/* Profile Butonu */}
+            <Link href="/profile">
+              <IconButton color="inherit">
+                <Person />
+              </IconButton>
+            </Link>
+          </>
         ) : (
           <Button color="inherit" onClick={onLoginClick}>
             Giriş Yap

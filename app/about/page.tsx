@@ -5,7 +5,7 @@ import { Box, Container, Typography, Grid, Card, CardContent, CardMedia } from "
 export default function AboutPage() {
   return (
     <Box>
-      {/* Hero Section */}
+
       <Box
         sx={{
           backgroundImage: "url('/assets/images/logos/GND.svg')",
@@ -71,8 +71,7 @@ export default function AboutPage() {
         <Grid container spacing={4} justifyContent="center">
           {[
             { name: "ÖMER GÜNDOĞDU", role: "CEO & Kurucu & Mechatronics Engineer", image: "/assets/images/team/omergundogdu.jpg" },
-            { name: "Zeynep Kaya", role: "Operasyon Müdürü", image: "/assets/images/team/17.jpg" },
-            { name: "Mehmet Demir", role: "Teknik Direktör", image: "/assets/images/team/10.jpg" },
+
           ].map((member, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Card sx={{ textAlign: "center", p: 2 }}>

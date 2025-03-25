@@ -1,15 +1,18 @@
-// app/admin/dashboard/layout.tsx
+// Bu dosya client tarafında render edilen bir layout bileşenidir
 "use client";
 
+// Gerekli React ve MUI kütüphaneleri import ediliyor
 import * as React from "react";
 import { alpha } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import AppTheme from "@/components/shared-theme/AppTheme";
-import SideMenu from "@/components/admin/components/SideMenu";
-import AppNavbar from "@/components/admin/components/AppNavbar";
 
+// Tema ve layout bileşenleri
+import AppTheme from "@/components/shared-theme/AppTheme"; // Uygulamanın tema sağlayıcısı
+import SideMenu from "@/components/admin/components/SideMenu"; // Sol menü (navigasyon)
+import AppNavbar from "@/components/admin/components/AppNavbar"; // Üst menü barı
+
+// MUI bileşenleri için özel tema özelleştirmeleri import ediliyor
 import {
   chartsCustomizations,
   dataGridCustomizations,
@@ -17,6 +20,7 @@ import {
   treeViewCustomizations,
 } from "@/components/admin/theme/customizations";
 
+// Tüm özelleştirmeleri tek bir nesnede birleştiriyoruz
 const xThemeComponents = {
   ...chartsCustomizations,
   ...dataGridCustomizations,
@@ -24,37 +28,29 @@ const xThemeComponents = {
   ...treeViewCustomizations,
 };
 
+// Admin paneli için layout bileşeni
 export default function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <AppTheme themeComponents={xThemeComponents}>
-      <CssBaseline enableColorScheme />
-      <Box sx={{ display: "flex"}}>
-        <SideMenu />
-        <AppNavbar />
+    <AppTheme themeComponents={xThemeComponents}> {/* Tema sağlayıcı */}
+      <CssBaseline enableColorScheme /> {/* Tarayıcılar arası tutarlı CSS ve dark/light desteği */}
+      <Box sx={{ display: "flex" }}> {/* Ana düzen (yatay) */}
+        <SideMenu /> {/* Sol navigasyon menüsü */}
+        <AppNavbar /> {/* Üstteki navbar */}
         <Box
           component="main"
           sx={(theme) => ({
-            flexGrow: 1,
+            flexGrow: 1, // İçerik genişlesin
             backgroundColor: theme.vars
               ? `rgba(${theme.vars.palette.background.defaultChannel} / 1)`
               : alpha(theme.palette.background.default, 1),
-            overflow: "auto",
+            overflow: "auto", // Taşma olursa scroll
           })}
         >
-          <Stack
-            spacing={2}
-            sx={{
-              alignItems: "center",
-              mx: 3,
-              my: 3,
-            }}
-          >
-            {children}
-          </Stack>
+          {children} {/* Sayfa içeriği buraya yerleşir */}
         </Box>
       </Box>
     </AppTheme>

@@ -33,6 +33,8 @@ export default function OptionsMenu() {
 
   const handleLogout = () => {
     localStorage.removeItem("admin-auth");
+    localStorage.removeItem("accessToken");
+
     router.replace("/admin");
   };
 

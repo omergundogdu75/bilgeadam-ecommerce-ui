@@ -105,21 +105,66 @@ export default function CheckoutModal({
       case 0:
         return (
           <Box display="flex" flexDirection="column" gap={2}>
-            <TextField label="Ad Soyad" name="name" value={form.name} onChange={handleChange} />
-            <TextField label="Email" name="email" value={form.email} onChange={handleChange} />
-            <TextField label="Adres" name="address" value={form.address} onChange={handleChange} />
-            <TextField label="Şehir" name="city" value={form.city} onChange={handleChange} />
-            <TextField label="Posta Kodu" name="postalCode" value={form.postalCode} onChange={handleChange} />
+            <TextField
+              label="Ad Soyad"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Adres"
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Şehir"
+              name="city"
+              value={form.city}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Posta Kodu"
+              name="postalCode"
+              value={form.postalCode}
+              onChange={handleChange}
+            />
           </Box>
         );
       case 1:
         return (
           <Box display="flex" flexDirection="column" gap={2}>
-            <TextField label="Kart Numarası" name="cardNumber" value={form.cardNumber} onChange={handleChange} />
+            <TextField
+              label="Kart Numarası"
+              name="cardNumber"
+              value={form.cardNumber}
+              onChange={handleChange}
+            />
             <Box display="flex" gap={2}>
-              <TextField label="Ay" name="cardMonth" value={form.cardMonth} onChange={handleChange} />
-              <TextField label="Yıl" name="cardYear" value={form.cardYear} onChange={handleChange} />
-              <TextField label="CVV" name="cardCvv" value={form.cardCvv} onChange={handleChange} />
+              <TextField
+                label="Ay"
+                name="cardMonth"
+                value={form.cardMonth}
+                onChange={handleChange}
+              />
+              <TextField
+                label="Yıl"
+                name="cardYear"
+                value={form.cardYear}
+                onChange={handleChange}
+              />
+              <TextField
+                label="CVV"
+                name="cardCvv"
+                value={form.cardCvv}
+                onChange={handleChange}
+              />
             </Box>
           </Box>
         );

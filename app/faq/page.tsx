@@ -20,7 +20,6 @@ export default function FaqPage() {
 
   return (
     <Box>
-      {/* Hero Section */}
       <Box
         sx={{
           backgroundImage: "url('/assets/images/logos/GND.svg')",

@@ -1,4 +1,3 @@
-// app/admin/page.tsx
 "use client";
 
 import SignInSide from "@/components/sign-in-side/SignInSide";

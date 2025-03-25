@@ -74,9 +74,6 @@ export default function SideMenu() {
           <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: '16px' }}>
            ÖMER GÜNDOĞDU
           </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            xxx@gnd.com
-          </Typography>
         </Box>
         <OptionsMenu />
       </Stack>

@@ -1,5 +1,6 @@
 "use client";
 
+// Gerekli importlar
 import {
   Box,
   Container,
@@ -16,6 +17,7 @@ import axiosClient from "@/lib/axiosClient";
 import { useCart } from "@/context/CartContext";
 import { toast } from "react-toastify";
 
+// Kategori tipi
 interface Category {
   id: number;
   name: string;
@@ -24,6 +26,7 @@ interface Category {
   children?: Category[];
 }
 
+// Ürün tipi
 interface Product {
   id: number;
   name: string;
@@ -33,15 +36,18 @@ interface Product {
 }
 
 export default function HomePage() {
+  // State tanımlamaları
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const { state, dispatch } = useCart();
+  const { state, dispatch } = useCart(); // Sepet context'i
 
+  // Sayfa yüklendiğinde kategorileri ve ürünleri getir
   useEffect(() => {
     fetchCategories();
     fetchProducts();
   }, []);
 
+  // Kategorileri API'den çek
   const fetchCategories = async () => {
     try {
       const res = await axiosClient.get<Category[]>("/categories");
@@ -51,6 +57,7 @@ export default function HomePage() {
     }
   };
 
+  // Ürünleri API'den çek (limitli)
   const fetchProducts = async () => {
     try {
       const res = await axiosClient.get<Product[]>("/products?limit=8");
@@ -60,13 +67,14 @@ export default function HomePage() {
     }
   };
 
+  // Sepete ürün ekle
   const handleAddToCart = (prod: Product) => {
     const existingItem = state.items.find((item) => item.id === prod.id);
     const currentQuantity = existingItem?.quantity ?? 0;
     const stock = prod.stock ?? Infinity;
 
     if (currentQuantity >= stock) {
-      toast.warning(`Bu üründen maksimum ${stock} adet eklenebilir.`);
+      toast.warning(`Bu üründen maksimum ${stock} adet sepete eklenebilir.`);
       return;
     }
 
@@ -87,7 +95,6 @@ export default function HomePage() {
 
   return (
     <Box>
-      {/* Hero */}
       <Box
         sx={{
           backgroundImage: "url('/assets/images/banners/long-banner.jpg')",
@@ -149,10 +156,10 @@ export default function HomePage() {
         </Grid>
       </Container>
 
-      {/* Öne Çıkan Ürünler */}
-      <Container >
+      {/* Ürünler */}
+      <Container>
         <Typography variant="h5" gutterBottom>
-          Öne Çıkan Ürünler
+          Ürünler
         </Typography>
         {products.length === 0 ? (
           <Typography>Henüz ürün bulunamadı.</Typography>
