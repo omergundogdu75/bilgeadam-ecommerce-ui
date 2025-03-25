@@ -13,6 +13,8 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import axiosClient from "@/lib/axiosClient";
+import { useCart } from "@/context/CartContext";
+import { toast } from "react-toastify";
 
 interface Category {
   id: number;
@@ -22,8 +24,23 @@ interface Category {
   children?: Category[];
 }
 
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  imageUrl: string;
+  stock?: number;
+}
+
 export default function HomePage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const { state, dispatch } = useCart();
+
+  useEffect(() => {
+    fetchCategories();
+    fetchProducts();
+  }, []);
 
   const fetchCategories = async () => {
     try {
@@ -34,9 +51,39 @@ export default function HomePage() {
     }
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  const fetchProducts = async () => {
+    try {
+      const res = await axiosClient.get<Product[]>("/products?limit=8");
+      setProducts(res.data);
+    } catch (err) {
+      console.error("Ürünler alınamadı:", err);
+    }
+  };
+
+  const handleAddToCart = (prod: Product) => {
+    const existingItem = state.items.find((item) => item.id === prod.id);
+    const currentQuantity = existingItem?.quantity ?? 0;
+    const stock = prod.stock ?? Infinity;
+
+    if (currentQuantity >= stock) {
+      toast.warning(`Bu üründen maksimum ${stock} adet eklenebilir.`);
+      return;
+    }
+
+    dispatch({
+      type: "ADD_TO_CART",
+      payload: {
+        id: prod.id,
+        name: prod.name,
+        price: prod.price,
+        imageUrl: prod.imageUrl,
+        quantity: 1,
+        stock: prod.stock,
+      },
+    });
+
+    toast.success("Ürün sepete eklendi ✅");
+  };
 
   return (
     <Box>
@@ -68,13 +115,15 @@ export default function HomePage() {
           </Button>
         </Container>
       </Box>
+
       {/* Kategoriler */}
-      <Container>
+      <Container sx={{ mt: 6 }}>
+        <Typography variant="h5" gutterBottom>
+          Kategoriler
+        </Typography>
         <Grid container spacing={3}>
           {categories.map((cat) => (
-            <Grid item 
-            // xs={12} sm={6} md={4} lg={3} 
-            key={cat.id}>
+            <Grid item key={cat.id}>
               <Link
                 href={`/category/${cat.slug}`}
                 style={{ textDecoration: "none" }}
@@ -82,7 +131,7 @@ export default function HomePage() {
                 <CardContent sx={{ textAlign: "center" }}>
                   <Box
                     component="img"
-                    src={cat.imageUrl}
+                    src={cat.imageUrl || "/placeholder.png"}
                     alt={cat.name}
                     sx={{
                       width: 100,
@@ -98,6 +147,67 @@ export default function HomePage() {
             </Grid>
           ))}
         </Grid>
+      </Container>
+
+      {/* Öne Çıkan Ürünler */}
+      <Container >
+        <Typography variant="h5" gutterBottom>
+          Öne Çıkan Ürünler
+        </Typography>
+        {products.length === 0 ? (
+          <Typography>Henüz ürün bulunamadı.</Typography>
+        ) : (
+          <Grid container spacing={3} sx={{ mb: 8 }}>
+            {products.map((prod) => (
+              <Grid item key={prod.id} xs={6} sm={4} md={3} lg={2}>
+                <Card
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    boxShadow: 3,
+                    borderRadius: 2,
+                    overflow: "hidden",
+                    transition: "transform 0.3s ease",
+                    "&:hover": {
+                      transform: "scale(1.03)",
+                      boxShadow: 6,
+                    },
+                  }}
+                >
+                  {prod.imageUrl && (
+                    <CardMedia
+                      component="img"
+                      image={prod.imageUrl}
+                      alt={prod.name}
+                      sx={{
+                        height: 200,
+                        objectFit: "contain",
+                      }}
+                    />
+                  )}
+                  <CardContent sx={{ p: 2, textAlign: "center" }}>
+                    <Typography variant="subtitle1" fontWeight="bold" noWrap>
+                      {prod.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {prod.price} ₺
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      sx={{ mt: 1 }}
+                      onClick={() => handleAddToCart(prod)}
+                    >
+                      Sepete Ekle
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Container>
     </Box>
   );

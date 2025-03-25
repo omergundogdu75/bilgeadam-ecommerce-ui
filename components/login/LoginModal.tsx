@@ -5,28 +5,36 @@ import {
   Box,
   Button,
   TextField,
-  Typography,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
 } from "@mui/material";
+import { toast } from "react-toastify";
+import { useAuth } from "@/context/AuthContext";
+import { login as loginService } from "@/auth/authService";
 
-export default function LoginModal({ open, onClose, onLogin }: {
+export default function LoginModal({
+  open,
+  onClose,
+}: {
   open: boolean;
   onClose: () => void;
-  onLogin: () => void;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email === "test@gnd.com" && password === "123456") {
-      onLogin();
+    try {
+      const { accessToken, refreshToken } = await loginService(email, password);
+      login(accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      toast.success("Giriş başarılı 🎉");
       onClose();
-    } else {
-      alert("Hatalı giriş bilgileri");
+    } catch (err) {
+      toast.error("Giriş başarısız. Lütfen bilgileri kontrol edin.");
     }
   };
 
@@ -53,9 +61,11 @@ export default function LoginModal({ open, onClose, onLogin }: {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <DialogActions>
+          <DialogActions sx={{ mt: 1 }}>
             <Button onClick={onClose}>İptal</Button>
-            <Button type="submit" variant="contained">Giriş Yap</Button>
+            <Button type="submit" variant="contained">
+              Giriş Yap
+            </Button>
           </DialogActions>
         </Box>
       </DialogContent>
