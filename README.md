@@ -31,7 +31,6 @@ Bu proje, Ömer Gündoğdu tarafından geliştirilen, Java Spring Boot backend v
 
 ### 2. Frontend
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
